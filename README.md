@@ -5,3 +5,4 @@ cd frontend
 npm install
 npm install react-router-dom react-toastify
 npm run dev
+install tailwind and postcss.config

@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 
+import RelatedProducts from '../components/RelatedProducts';
 import { ShopContext } from '../context/ShopContext';
 import { assets } from '../assets/assets';
 import { useParams } from 'react-router-dom';
@@ -100,10 +101,11 @@ const Product = () => {
             With an easy return and exchange policy within 7 days, upgrading your wardrobe 
             has never been simpler!
           </p>
-          
         </div>
-
       </div>
+
+      {/* Display related Products */}
+      <RelatedProducts category={productData.category} subCategory={productData.subCategory} />
       
     </div>
   ) : <div className='opacity-0'></div>

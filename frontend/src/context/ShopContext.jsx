@@ -53,6 +53,21 @@ const ShopContextProvider = (props) => {
         return totalCount;
     }
 
+    const updateQunatity = async (itemId, size, quantity) => {
+        let cartData = structuredClone(cartItems);
+
+        if (quantity <= 0) {
+            delete cartData[itemId][size];
+            if (Object.keys(cartData[itemId]).length === 0) {
+            delete cartData[itemId]; // remove item completely if no sizes left
+            }
+        } else {
+            cartData[itemId][size] = quantity;
+        }
+
+        setCartItems(cartData);
+    };
+
     useEffect(() => {
         // console.log('Cart Items Updated:', cartItems);
     }, [cartItems]);
@@ -61,7 +76,7 @@ const ShopContextProvider = (props) => {
         products, currency, delivery_fee,
         search, setSearch, showSearch, setShowSearch,
         cartItems, addToCart,
-        getCartCount
+        getCartCount, updateQunatity,
     }
     
     return (

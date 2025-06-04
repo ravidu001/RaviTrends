@@ -71,6 +71,8 @@ import profile_icon from './profile_icon.png'
 import quality_icon from './quality_icon.png'
 import razorpay_logo from './razorpay_logo.png'
 import search_icon from './search_icon.png'
+import social1 from './social1.png'
+import social2 from './social2.png'
 import star_dull_icon from './star_dull_icon.png'
 import star_icon from './star_icon.png'
 import stripe_logo from './stripe_logo.png'
@@ -82,6 +84,8 @@ export const assets = {
     logo6,
     logo7,
     logo8,
+    social1,
+    social2,
     hero_img,
     cart_icon,
     dropdown_icon,

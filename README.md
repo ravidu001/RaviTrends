@@ -15,3 +15,5 @@ creat backend folder
 npm init 
 npm i cors dotenv express jsonwebtoken mongoose multer nodemon razorpay stripe validator cloudinary bcrypt
 
+productController >> line 10 >> sucess: false
+check the video if image add for product is error >> productController >> time:6.40

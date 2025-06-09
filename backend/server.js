@@ -4,6 +4,7 @@ import connectCloudinary from './config/cloudinary.js';
 import connectDB from './config/mongodb.js';
 import cors from 'cors';
 import express from 'express';
+import productRouter from './routes/productRoute.js';
 import userRouter from './routes/userRoute.js';
 
 // add config for CORS
@@ -17,7 +18,8 @@ app.use(express.json({ limit: '10mb' }));
 app.use(cors());
 
 // API endpoints
-app.use('/api/user', userRouter); 
+app.use('/api/user', userRouter); // User routes
+app.use('/api/product', productRouter); // Product routes
 
 // API endpoint
 app.get('/', (req, res) => {

@@ -105,7 +105,30 @@ const removeProduct = async (req, res) => {
 
 // function for single product info
 const singleProduct = async (req, res) => {
-
+    try {
+        
+        const { productId } = req.body;
+        const product = await productModel.findById(productId);
+        
+        // Check if product exists
+        if (!product) {
+            return res.json({
+                success: false,
+                message: "Product not found"
+            });
+        }
+        
+        res.json({
+            success: true,
+            product
+        });
+    } catch (error) {
+        console.log("Error in fetching single product:", error);
+        res.json({
+            success: false,
+            message: error.message
+        });
+    }
 
 
 }

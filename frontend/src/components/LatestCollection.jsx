@@ -12,7 +12,7 @@ const LatestCollection = () => {
 
     useEffect(()=>{
         setLatestProducts(products.slice(0,10));
-    },[])
+    },[products])
 
     // console.log(products);
   return (

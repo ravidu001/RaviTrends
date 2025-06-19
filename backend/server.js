@@ -1,5 +1,6 @@
 import 'dotenv/config';
 
+import cartRouter from './routes/cartRoute.js';
 import connectCloudinary from './config/cloudinary.js';
 import connectDB from './config/mongodb.js';
 import cors from 'cors';
@@ -20,6 +21,7 @@ app.use(cors());
 // API endpoints
 app.use('/api/user', userRouter); // User routes
 app.use('/api/product', productRouter); // Product routes
+app.use('/apicart', cartRouter)
 
 // API endpoint
 app.get('/', (req, res) => {

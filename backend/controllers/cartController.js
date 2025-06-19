@@ -1,3 +1,4 @@
+import userModel from '../models/userModel.js';
 
 // add product to user cart
 const addToCart = async (req,res) => {
@@ -15,6 +16,7 @@ const addToCart = async (req,res) => {
                 cartData[itemId][size] = 1; // Add new size with quantity 1
             }
         } else {
+            cartData[itemId] = {}; // Create a new item entry
             cartData[itemId][size] = 1 ; // Add new item with size and quantity 1
         }
 

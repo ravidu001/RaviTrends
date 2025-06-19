@@ -5,6 +5,7 @@ import connectCloudinary from './config/cloudinary.js';
 import connectDB from './config/mongodb.js';
 import cors from 'cors';
 import express from 'express';
+import orderRouter from './routes/orderRoute.js';
 import productRouter from './routes/productRoute.js';
 import userRouter from './routes/userRoute.js';
 
@@ -22,6 +23,7 @@ app.use(cors());
 app.use('/api/user', userRouter); // User routes
 app.use('/api/product', productRouter); // Product routes
 app.use('/api/cart', cartRouter)
+app.use('/api/order', orderRouter)
 
 // API endpoint
 app.get('/', (req, res) => {

@@ -1,4 +1,5 @@
 import orderModel from "../models/orderModel.js";
+import userModel from "../models/userModel.js";
 
 // Placing orders using COD Method
 const placeOrder = async (req, res) => {
@@ -48,6 +49,16 @@ const allOrders = async (req, res) => {
 
 // User Order Data For Frontend
 const userOrders = async (req, res) => {
+    try {
+        const { userId } = req.body;
+        const orders = await orderModel.find({userId})
+
+        res.json({success:true, orders})
+        
+    } catch (error) {
+        console.log(error);
+        res.json({success:false, message:error.message});
+    }
 
 }
 

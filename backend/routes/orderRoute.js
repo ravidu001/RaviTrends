@@ -16,6 +16,6 @@ orderRouter.post('/stripe', authUser, placeOrderStripe);
 orderRouter.post('/razorpay', authUser, placeOrderRazorpay);
 
 // User Features
-orderRouter.post('/userorders', adminAuth, userOrders);
+orderRouter.post('/userorders', authUser, userOrders);
 
 export default orderRouter;

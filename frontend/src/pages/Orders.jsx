@@ -25,13 +25,16 @@ const Orders = () => {
       if (response.data.success) {
         let allOrderitem = [];
         response.data.orders.map((order) => {
-          order.items.map((item) => {
-            item['status'] = order.status;
-            item['date'] = order.date;
-            item['paymentMethod'] = order.paymentMethod;
-            item['payment'] = order.payment;
-            allOrderitem.push(item);
-          })
+          // Only include orders that are not delivered or failed
+          if (order.status !== 'Delivered' && order.status !== 'Delivery Failed') {
+            order.items.map((item) => {
+              item['status'] = order.status;
+              item['date'] = order.date;
+              item['paymentMethod'] = order.paymentMethod;
+              item['payment'] = order.payment;
+              allOrderitem.push(item);
+            })
+          }
         })
         // console.log(allOrderitems);
         setorderData(allOrderitem.reverse());
@@ -54,9 +57,16 @@ const Orders = () => {
       <div className='text-2xl'>
         <Title text1={'MY'} text2={'ORDERS'} />
       </div>
+      
+      <p className='text-sm text-gray-600 mt-2 mb-4'>Track your active orders (Order Placed, Shipped, Out for delivery)</p>
 
       <div className='sm:mt-3'>
-        {
+        {orderData.length === 0 ? (
+          <div className='text-center py-12'>
+            <p className='text-gray-500 mb-4'>No active orders found</p>
+            <p className='text-sm text-gray-400'>Your delivered orders can be found in your profile</p>
+          </div>
+        ) : (
           orderData.map((item,index)=> (
             <div key={index} className='py-4 border-t border-b text-gray700 flex flex-col md:flex-row md:items0center md:justify-between gap-4'>
               <div className='flex items-start gap-6 yexy-sm'>
@@ -83,7 +93,7 @@ const Orders = () => {
               </div>
             </div>
           ))
-        }
+        )}
       </div>
     </div>
   )

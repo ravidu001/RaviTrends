@@ -60,7 +60,7 @@ const Profile = () => {
       });
       if (response.data.success) {
         // Filter to show only delivered orders in profile
-        const deliveredOrders = response.data.orders.filter(order => order.status === 'Delivered');
+        const deliveredOrders = response.data.orders.filter(order => order.status === 'Delivered' || order.status === 'Delivery Failed');
         setOrders(deliveredOrders);
       }
     } catch (error) {
@@ -359,10 +359,10 @@ const Profile = () => {
       {activeTab === 'orders' && (
         <div>
           <h3 className='text-xl font-medium mb-6'>Order History</h3>
-          <p className='text-sm text-gray-600 mb-4'>Showing only your delivered orders</p>
+          <p className='text-sm text-gray-600 mb-4'>Showing your completed orders (delivered and failed deliveries)</p>
           {orders.length === 0 ? (
             <div className='text-center py-12'>
-              <p className='text-gray-500 mb-4'>No delivered orders found</p>
+              <p className='text-gray-500 mb-4'>No completed orders found</p>
               <button 
                 onClick={() => navigate('/collection')}
                 className='bg-black text-white px-8 py-3 text-sm hover:bg-gray-800'
@@ -383,8 +383,12 @@ const Profile = () => {
                     </div>
                     <div className='text-right'>
                       <p className='font-medium'>${order.amount}</p>
-                      <p className='text-sm px-2 py-1 rounded bg-green-100 text-green-800'>
-                        Delivered
+                      <p className={`text-sm px-2 py-1 rounded ${
+                        order.status === 'Delivered' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {order.status}
                       </p>
                     </div>
                   </div>

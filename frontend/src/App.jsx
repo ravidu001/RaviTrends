@@ -14,6 +14,7 @@ import Navbar from './components/Navbar'
 import Orders from './pages/Orders'
 import PlaceOrder from './pages/PlaceOrder'
 import Product from './pages/Product'
+import Profile from './pages/Profile';
 import React from 'react'
 import SearchBar from './components/SearchBar'
 import Verify from './pages/Verify';
@@ -33,6 +34,7 @@ const App = () => {
         <Route path='/cart' element={<Cart/>} />
         <Route path='/login' element={<Login/>} />
         <Route path='/place-order' element={<PlaceOrder/>} />
+        <Route path='/profile' element={<Profile />} />
         <Route path='/orders' element={<Orders/>} />
         <Route path='/verify' element={<Verify />} />
       </Routes>

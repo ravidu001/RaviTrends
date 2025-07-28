@@ -59,7 +59,9 @@ const Profile = () => {
         headers: { token }
       });
       if (response.data.success) {
-        setOrders(response.data.orders);
+        // Filter to show only delivered orders in profile
+        const deliveredOrders = response.data.orders.filter(order => order.status === 'Delivered');
+        setOrders(deliveredOrders);
       }
     } catch (error) {
       console.log(error);
@@ -126,6 +128,30 @@ const Profile = () => {
     localStorage.removeItem('userProfile');
     navigate('/');
     toast.success('Logged out successfully!');
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmDelete = window.confirm(
+      'Are you sure you want to delete your account? This action cannot be undone and you will lose all your data.'
+    );
+    
+    if (confirmDelete) {
+      try {
+        const response = await axios.post(backendUrl + '/api/user/delete-account', {}, {
+          headers: { token }
+        });
+        if (response.data.success) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('userProfile');
+          navigate('/');
+          toast.success('Account deleted successfully');
+        } else {
+          toast.error(response.data.message);
+        }
+      } catch (error) {
+        toast.error('Error deleting account');
+      }
+    }
   };
 
   if (!token) {
@@ -333,9 +359,10 @@ const Profile = () => {
       {activeTab === 'orders' && (
         <div>
           <h3 className='text-xl font-medium mb-6'>Order History</h3>
+          <p className='text-sm text-gray-600 mb-4'>Showing only your delivered orders</p>
           {orders.length === 0 ? (
             <div className='text-center py-12'>
-              <p className='text-gray-500 mb-4'>No orders found</p>
+              <p className='text-gray-500 mb-4'>No delivered orders found</p>
               <button 
                 onClick={() => navigate('/collection')}
                 className='bg-black text-white px-8 py-3 text-sm hover:bg-gray-800'
@@ -356,14 +383,8 @@ const Profile = () => {
                     </div>
                     <div className='text-right'>
                       <p className='font-medium'>${order.amount}</p>
-                      <p className={`text-sm px-2 py-1 rounded ${
-                        order.status === 'Order Placed' ? 'bg-yellow-100 text-yellow-800' :
-                        order.status === 'Packing' ? 'bg-blue-100 text-blue-800' :
-                        order.status === 'Shipped' ? 'bg-purple-100 text-purple-800' :
-                        order.status === 'Out for delivery' ? 'bg-orange-100 text-orange-800' :
-                        'bg-green-100 text-green-800'
-                      }`}>
-                        {order.status}
+                      <p className='text-sm px-2 py-1 rounded bg-green-100 text-green-800'>
+                        Delivered
                       </p>
                     </div>
                   </div>
@@ -389,56 +410,65 @@ const Profile = () => {
       {/* Security Tab */}
       {activeTab === 'security' && (
         <div className='max-w-md'>
-          <h3 className='text-xl font-medium mb-6'>Change Password</h3>
-          <form onSubmit={handlePasswordUpdate} className='space-y-4'>
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Current Password</label>
-              <input 
-                type="password" 
-                name='currentPassword'
-                value={passwordData.currentPassword}
-                onChange={onPasswordChangeHandler}
-                required
-                className='w-full border border-gray-300 rounded py-2 px-3'
-              />
-            </div>
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>New Password</label>
-              <input 
-                type="password" 
-                name='newPassword'
-                value={passwordData.newPassword}
-                onChange={onPasswordChangeHandler}
-                required
-                className='w-full border border-gray-300 rounded py-2 px-3'
-              />
-            </div>
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Confirm New Password</label>
-              <input 
-                type="password" 
-                name='confirmPassword'
-                value={passwordData.confirmPassword}
-                onChange={onPasswordChangeHandler}
-                required
-                className='w-full border border-gray-300 rounded py-2 px-3'
-              />
-            </div>
-            <button 
-              type='submit'
-              className='bg-black text-white px-8 py-3 text-sm hover:bg-gray-800'
-            >
-              Update Password
-            </button>
-          </form>
+          <h3 className='text-xl font-medium mb-6'>Security Settings</h3>
+          
+          {/* Change Password Section */}
+          <div className='mb-12'>
+            <h4 className='text-lg font-medium mb-4'>Change Password</h4>
+            <form onSubmit={handlePasswordUpdate} className='space-y-4'>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>Current Password</label>
+                <input 
+                  type="password" 
+                  name='currentPassword'
+                  value={passwordData.currentPassword}
+                  onChange={onPasswordChangeHandler}
+                  required
+                  className='w-full border border-gray-300 rounded py-2 px-3'
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>New Password</label>
+                <input 
+                  type="password" 
+                  name='newPassword'
+                  value={passwordData.newPassword}
+                  onChange={onPasswordChangeHandler}
+                  required
+                  className='w-full border border-gray-300 rounded py-2 px-3'
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>Confirm New Password</label>
+                <input 
+                  type="password" 
+                  name='confirmPassword'
+                  value={passwordData.confirmPassword}
+                  onChange={onPasswordChangeHandler}
+                  required
+                  className='w-full border border-gray-300 rounded py-2 px-3'
+                />
+              </div>
+              <button 
+                type='submit'
+                className='bg-black text-white px-8 py-3 text-sm hover:bg-gray-800'
+              >
+                Update Password
+              </button>
+            </form>
+          </div>
 
-          <div className='mt-12 pt-8 border-t'>
-            <h4 className='text-lg font-medium mb-4'>Account Actions</h4>
+          {/* Delete Account Section */}
+          <div className='pt-8 border-t border-red-200'>
+            <h4 className='text-lg font-medium mb-4 text-red-600'>Danger Zone</h4>
+            <p className='text-sm text-gray-600 mb-4'>
+              Once you delete your account, there is no going back. Please be certain.
+            </p>
             <button 
-              onClick={handleLogout}
-              className='bg-red-600 text-white px-8 py-3 text-sm hover:bg-red-700'
+              onClick={handleDeleteAccount}
+              className='bg-red-600 text-white px-8 py-3 text-sm hover:bg-red-700 border border-red-600'
             >
-              Logout
+              Delete Account
             </button>
           </div>
         </div>

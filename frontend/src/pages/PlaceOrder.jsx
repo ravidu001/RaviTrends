@@ -1,11 +1,11 @@
-import React, { useContext, useState, useEffect } from 'react'
-import { toast } from 'react-toastify'
+import React, { useContext, useEffect, useState } from 'react'
 
 import CartTotal from '../components/CartTotal'
 import { ShopContext } from '../context/ShopContext'
 import Title from '../components/Title'
 import { assets } from '../assets/assets'
 import axios from 'axios'
+import { toast } from 'react-toastify'
 
 const PlaceOrder = () => {
 

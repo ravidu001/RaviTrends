@@ -1,12 +1,30 @@
 import userModel from '../models/userModel.js';
 
+// Helper function to check if user is active
+const checkUserStatus = async (userId) => {
+    const user = await userModel.findById(userId);
+    if (!user) {
+        return { valid: false, message: 'User not found' };
+    }
+    if (!user.isActive) {
+        return { valid: false, message: 'Account is deactivated' };
+    }
+    return { valid: true, user };
+};
+
 // add product to user cart
 const addToCart = async (req,res) => {
     try {
         
         const { userId, itemId, size } = req.body;
         
-        const userData = await userModel.findById(userId);
+        // Check user status
+        const userCheck = await checkUserStatus(userId);
+        if (!userCheck.valid) {
+            return res.json({ success: false, message: userCheck.message });
+        }
+        
+        const userData = userCheck.user;
         let cartData = await userData.cartData;
 
         if (cartData[itemId]){
@@ -35,7 +53,13 @@ const updateCart = async (req,res) => {
     try {
         const { userId, itemId, size, quantity } = req.body;
         
-        const userData = await userModel.findById(userId);
+        // Check user status
+        const userCheck = await checkUserStatus(userId);
+        if (!userCheck.valid) {
+            return res.json({ success: false, message: userCheck.message });
+        }
+        
+        const userData = userCheck.user;
         let cartData = await userData.cartData;
 
         cartData[itemId][size] = quantity; // Update the quantity of the specified item and size
@@ -55,7 +79,13 @@ const getUserCart = async (req,res) => {
     try {
         const { userId } = req.body;
         
-        const userData = await userModel.findById(userId);
+        // Check user status
+        const userCheck = await checkUserStatus(userId);
+        if (!userCheck.valid) {
+            return res.json({ success: false, message: userCheck.message });
+        }
+        
+        const userData = userCheck.user;
         let cartData = await userData.cartData;
 
         if (!cartData) {

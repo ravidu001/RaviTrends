@@ -1,4 +1,5 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
+import { toast } from 'react-toastify'
 
 import CartTotal from '../components/CartTotal'
 import { ShopContext } from '../context/ShopContext'
@@ -9,6 +10,7 @@ import axios from 'axios'
 const PlaceOrder = () => {
 
   const [method, setMethod] = useState('cod');
+  const [useProfileData, setUseProfileData] = useState(false);
   const {navigate, backendUrl, token, cartItems, getCartAmount, delivery_fee, products, setCartItems} = useContext(ShopContext);
   
   const [formData, setFormData] = useState({
@@ -24,6 +26,39 @@ const PlaceOrder = () => {
     phoneNumber: ''
   });
 
+  // Load saved profile data
+  useEffect(() => {
+    const savedProfile = localStorage.getItem('userProfile');
+    if (savedProfile && useProfileData) {
+      const profileData = JSON.parse(savedProfile);
+      setFormData(profileData);
+    }
+  }, [useProfileData]);
+
+  const handleUseProfileData = (checked) => {
+    setUseProfileData(checked);
+    if (checked) {
+      const savedProfile = localStorage.getItem('userProfile');
+      if (savedProfile) {
+        const profileData = JSON.parse(savedProfile);
+        setFormData(profileData);
+      }
+    } else {
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        houseNo: '',
+        street: '',
+        city: '',
+        district: '',
+        province: '',
+        postalCode: '',
+        phoneNumber: ''
+      });
+    }
+  };
+  
   const onChangeHandler = (event) => {
     const name = event.target.name;
     const value = event.target.value;
@@ -102,6 +137,23 @@ const PlaceOrder = () => {
         <div className='text-xl sm:text-2xl my-3'>
           <Title text1={'DELIVERY'} text2={'INFORMATION'} />
         </div>
+
+        {/* Auto-fill checkbox */}
+        {token && (
+          <div className='flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded'>
+            <input 
+              type="checkbox" 
+              id="useProfile"
+              checked={useProfileData}
+              onChange={(e) => handleUseProfileData(e.target.checked)}
+              className='w-4 h-4'
+            />
+            <label htmlFor="useProfile" className='text-sm text-gray-700 cursor-pointer'>
+              Use my saved profile information
+            </label>
+          </div>
+        )}
+        
         <div className='flex gap-3'>
           <input required onChange={onChangeHandler} name='firstName' value={formData.firstName} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='First name' />
           <input required onChange={onChangeHandler} name='lastName' value={formData.lastName} className='border border-gray-300 rounded py-1.5 px-3.5 w-full' type="text" placeholder='Last name' />

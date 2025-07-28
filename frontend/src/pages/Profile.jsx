@@ -1,8 +1,449 @@
-import React from 'react'
+import React, { useContext, useEffect, useState } from 'react'
+
+import { ShopContext } from '../context/ShopContext'
+import Title from '../components/Title'
+import { assets } from '../assets/assets'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
 const Profile = () => {
+  const { backendUrl, token, navigate } = useContext(ShopContext);
+  
+  const [activeTab, setActiveTab] = useState('profile');
+  const [isEditing, setIsEditing] = useState(false);
+  const [orders, setOrders] = useState([]);
+  
+  const [profileData, setProfileData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    houseNo: '',
+    street: '',
+    city: '',
+    district: '',
+    province: '',
+    postalCode: '',
+    phoneNumber: ''
+  });
+
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+
+  // Load user profile data
+  useEffect(() => {
+    if (token) {
+      loadUserProfile();
+      loadUserOrders();
+    }
+  }, [token]);
+
+  const loadUserProfile = async () => {
+    try {
+      const response = await axios.get(backendUrl + '/api/user/profile', {
+        headers: { token }
+      });
+      if (response.data.success) {
+        setProfileData(response.data.user);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const loadUserOrders = async () => {
+    try {
+      const response = await axios.post(backendUrl + '/api/order/userorders', {}, {
+        headers: { token }
+      });
+      if (response.data.success) {
+        setOrders(response.data.orders);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onChangeHandler = (event) => {
+    const name = event.target.name;
+    const value = event.target.value;
+    setProfileData(data => ({ ...data, [name]: value }));
+  };
+
+  const onPasswordChangeHandler = (event) => {
+    const name = event.target.name;
+    const value = event.target.value;
+    setPasswordData(data => ({ ...data, [name]: value }));
+  };
+
+  const handleProfileUpdate = async (event) => {
+    event.preventDefault();
+    try {
+      const response = await axios.post(backendUrl + '/api/user/update-profile', profileData, {
+        headers: { token }
+      });
+      if (response.data.success) {
+        toast.success('Profile updated successfully!');
+        setIsEditing(false);
+        // Save to localStorage for auto-fill functionality
+        localStorage.setItem('userProfile', JSON.stringify(profileData));
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error('Error updating profile');
+    }
+  };
+
+  const handlePasswordUpdate = async (event) => {
+    event.preventDefault();
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+    try {
+      const response = await axios.post(backendUrl + '/api/user/change-password', {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      }, {
+        headers: { token }
+      });
+      if (response.data.success) {
+        toast.success('Password updated successfully!');
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error('Error updating password');
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userProfile');
+    navigate('/');
+    toast.success('Logged out successfully!');
+  };
+
+  if (!token) {
+    return (
+      <div className='text-center py-20'>
+        <p className='text-gray-500 mb-4'>Please login to view your profile</p>
+        <button 
+          onClick={() => navigate('/login')}
+          className='bg-black text-white px-8 py-3 text-sm hover:bg-gray-800'
+        >
+          LOGIN
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div>Profile</div>
+    <div className='border-t pt-16 min-h-[80vh]'>
+      <div className='text-2xl mb-8'>
+        <Title text1={'MY'} text2={'PROFILE'} />
+      </div>
+
+      {/* Tab Navigation */}
+      <div className='flex border-b mb-8'>
+        <button 
+          onClick={() => setActiveTab('profile')}
+          className={`px-6 py-3 font-medium ${activeTab === 'profile' ? 'border-b-2 border-black text-black' : 'text-gray-500'}`}
+        >
+          Profile Information
+        </button>
+        <button 
+          onClick={() => setActiveTab('orders')}
+          className={`px-6 py-3 font-medium ${activeTab === 'orders' ? 'border-b-2 border-black text-black' : 'text-gray-500'}`}
+        >
+          Order History
+        </button>
+        <button 
+          onClick={() => setActiveTab('security')}
+          className={`px-6 py-3 font-medium ${activeTab === 'security' ? 'border-b-2 border-black text-black' : 'text-gray-500'}`}
+        >
+          Security
+        </button>
+      </div>
+
+      {/* Profile Information Tab */}
+      {activeTab === 'profile' && (
+        <div className='max-w-2xl'>
+          <div className='flex justify-between items-center mb-6'>
+            <h3 className='text-xl font-medium'>Personal Information</h3>
+            <button 
+              onClick={() => setIsEditing(!isEditing)}
+              className='bg-black text-white px-6 py-2 text-sm hover:bg-gray-800'
+            >
+              {isEditing ? 'Cancel' : 'Edit Profile'}
+            </button>
+          </div>
+
+          <form onSubmit={handleProfileUpdate} className='space-y-4'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>First Name</label>
+                <input 
+                  type="text" 
+                  name='firstName'
+                  value={profileData.firstName}
+                  onChange={onChangeHandler}
+                  disabled={!isEditing}
+                  className={`w-full border border-gray-300 rounded py-2 px-3 ${!isEditing ? 'bg-gray-50' : ''}`}
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>Last Name</label>
+                <input 
+                  type="text" 
+                  name='lastName'
+                  value={profileData.lastName}
+                  onChange={onChangeHandler}
+                  disabled={!isEditing}
+                  className={`w-full border border-gray-300 rounded py-2 px-3 ${!isEditing ? 'bg-gray-50' : ''}`}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>Email Address</label>
+              <input 
+                type="email" 
+                name='email'
+                value={profileData.email}
+                onChange={onChangeHandler}
+                disabled={!isEditing}
+                className={`w-full border border-gray-300 rounded py-2 px-3 ${!isEditing ? 'bg-gray-50' : ''}`}
+              />
+            </div>
+
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>House No.</label>
+                <input 
+                  type="text" 
+                  name='houseNo'
+                  value={profileData.houseNo}
+                  onChange={onChangeHandler}
+                  disabled={!isEditing}
+                  className={`w-full border border-gray-300 rounded py-2 px-3 ${!isEditing ? 'bg-gray-50' : ''}`}
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>Street</label>
+                <input 
+                  type="text" 
+                  name='street'
+                  value={profileData.street}
+                  onChange={onChangeHandler}
+                  disabled={!isEditing}
+                  className={`w-full border border-gray-300 rounded py-2 px-3 ${!isEditing ? 'bg-gray-50' : ''}`}
+                />
+              </div>
+            </div>
+
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>City</label>
+                <input 
+                  type="text" 
+                  name='city'
+                  value={profileData.city}
+                  onChange={onChangeHandler}
+                  disabled={!isEditing}
+                  className={`w-full border border-gray-300 rounded py-2 px-3 ${!isEditing ? 'bg-gray-50' : ''}`}
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>District</label>
+                <input 
+                  type="text" 
+                  name='district'
+                  value={profileData.district}
+                  onChange={onChangeHandler}
+                  disabled={!isEditing}
+                  className={`w-full border border-gray-300 rounded py-2 px-3 ${!isEditing ? 'bg-gray-50' : ''}`}
+                />
+              </div>
+            </div>
+
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>Province</label>
+                <input 
+                  type="text" 
+                  name='province'
+                  value={profileData.province}
+                  onChange={onChangeHandler}
+                  disabled={!isEditing}
+                  className={`w-full border border-gray-300 rounded py-2 px-3 ${!isEditing ? 'bg-gray-50' : ''}`}
+                />
+              </div>
+              <div>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>Postal Code</label>
+                <input 
+                  type="text" 
+                  name='postalCode'
+                  value={profileData.postalCode}
+                  onChange={onChangeHandler}
+                  disabled={!isEditing}
+                  className={`w-full border border-gray-300 rounded py-2 px-3 ${!isEditing ? 'bg-gray-50' : ''}`}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>Phone Number</label>
+              <input 
+                type="tel" 
+                name='phoneNumber'
+                value={profileData.phoneNumber}
+                onChange={onChangeHandler}
+                disabled={!isEditing}
+                className={`w-full border border-gray-300 rounded py-2 px-3 ${!isEditing ? 'bg-gray-50' : ''}`}
+              />
+            </div>
+
+            {isEditing && (
+              <div className='flex gap-4 pt-4'>
+                <button 
+                  type='submit'
+                  className='bg-black text-white px-8 py-3 text-sm hover:bg-gray-800'
+                >
+                  Save Changes
+                </button>
+                <button 
+                  type='button'
+                  onClick={() => setIsEditing(false)}
+                  className='border border-gray-300 px-8 py-3 text-sm hover:bg-gray-50'
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </form>
+        </div>
+      )}
+
+      {/* Order History Tab */}
+      {activeTab === 'orders' && (
+        <div>
+          <h3 className='text-xl font-medium mb-6'>Order History</h3>
+          {orders.length === 0 ? (
+            <div className='text-center py-12'>
+              <p className='text-gray-500 mb-4'>No orders found</p>
+              <button 
+                onClick={() => navigate('/collection')}
+                className='bg-black text-white px-8 py-3 text-sm hover:bg-gray-800'
+              >
+                Start Shopping
+              </button>
+            </div>
+          ) : (
+            <div className='space-y-4'>
+              {orders.map((order, index) => (
+                <div key={index} className='border border-gray-200 p-6 rounded-lg'>
+                  <div className='flex justify-between items-start mb-4'>
+                    <div>
+                      <h4 className='font-medium'>Order #{order._id}</h4>
+                      <p className='text-sm text-gray-500'>
+                        {new Date(order.date).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className='text-right'>
+                      <p className='font-medium'>${order.amount}</p>
+                      <p className={`text-sm px-2 py-1 rounded ${
+                        order.status === 'Order Placed' ? 'bg-yellow-100 text-yellow-800' :
+                        order.status === 'Packing' ? 'bg-blue-100 text-blue-800' :
+                        order.status === 'Shipped' ? 'bg-purple-100 text-purple-800' :
+                        order.status === 'Out for delivery' ? 'bg-orange-100 text-orange-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {order.status}
+                      </p>
+                    </div>
+                  </div>
+                  <div className='space-y-2'>
+                    {order.items.map((item, itemIndex) => (
+                      <div key={itemIndex} className='flex items-center gap-4'>
+                        <img src={item.image[0]} alt={item.name} className='w-12 h-12 object-cover rounded' />
+                        <div className='flex-1'>
+                          <p className='text-sm font-medium'>{item.name}</p>
+                          <p className='text-xs text-gray-500'>Size: {item.size} | Qty: {item.quantity}</p>
+                        </div>
+                        <p className='text-sm font-medium'>${item.price}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Security Tab */}
+      {activeTab === 'security' && (
+        <div className='max-w-md'>
+          <h3 className='text-xl font-medium mb-6'>Change Password</h3>
+          <form onSubmit={handlePasswordUpdate} className='space-y-4'>
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>Current Password</label>
+              <input 
+                type="password" 
+                name='currentPassword'
+                value={passwordData.currentPassword}
+                onChange={onPasswordChangeHandler}
+                required
+                className='w-full border border-gray-300 rounded py-2 px-3'
+              />
+            </div>
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>New Password</label>
+              <input 
+                type="password" 
+                name='newPassword'
+                value={passwordData.newPassword}
+                onChange={onPasswordChangeHandler}
+                required
+                className='w-full border border-gray-300 rounded py-2 px-3'
+              />
+            </div>
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>Confirm New Password</label>
+              <input 
+                type="password" 
+                name='confirmPassword'
+                value={passwordData.confirmPassword}
+                onChange={onPasswordChangeHandler}
+                required
+                className='w-full border border-gray-300 rounded py-2 px-3'
+              />
+            </div>
+            <button 
+              type='submit'
+              className='bg-black text-white px-8 py-3 text-sm hover:bg-gray-800'
+            >
+              Update Password
+            </button>
+          </form>
+
+          <div className='mt-12 pt-8 border-t'>
+            <h4 className='text-lg font-medium mb-4'>Account Actions</h4>
+            <button 
+              onClick={handleLogout}
+              className='bg-red-600 text-white px-8 py-3 text-sm hover:bg-red-700'
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 

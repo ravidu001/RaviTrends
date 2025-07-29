@@ -86,10 +86,16 @@ RaviTrends/
    cd backend
    npm install
    
-   # Create .env file and add your environment variables
-   echo "MONGODB_URI=your_mongodb_connection_string" > .env
-   echo "JWT_SECRET=your_jwt_secret" >> .env
-   echo "PORT=4000" >> .env
+   # Create environment file from example
+   cp .env.example .env
+   
+   # Edit .env file with your actual values:
+   # - MongoDB connection string
+   # - JWT secret key (minimum 32 characters)
+   # - Admin credentials
+   # - Cloudinary credentials for image uploads
+   # - Stripe secret key for payments
+   nano .env  # or use your preferred editor
    
    # Start the backend server
    npm run server
@@ -115,15 +121,40 @@ RaviTrends/
 
 ## 🔧 Environment Variables
 
+Create a `.env` file in the backend directory using the provided `.env.example` template:
+
 ### Backend (.env)
 ```env
-MONGODB_URI=mongodb://localhost:27017/ravitrends
-JWT_SECRET=your_super_secret_jwt_key
+# Server Configuration
 PORT=4000
-CLOUDINARY_NAME=your_cloudinary_name (if using Cloudinary)
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+
+# Database Configuration
+MONGODB_URI=mongodb://localhost:27017/ravitrends
+
+# JWT Configuration (use a strong 32+ character secret)
+JWT_SECRET=your_super_secret_jwt_key_here_minimum_32_characters_long
+
+# Admin Credentials
+ADMIN_EMAIL=admin@ravitrends.com
+ADMIN_PASSWORD=your_secure_admin_password
+
+# Cloudinary Configuration (for image uploads)
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+
+# Stripe Configuration (for payments)
+STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key_here
+
+# Environment
+NODE_ENV=development
 ```
+
+### Required Services Setup:
+
+1. **MongoDB**: Set up MongoDB locally or use MongoDB Atlas
+2. **Cloudinary**: Create account at [Cloudinary](https://cloudinary.com) for image storage
+3. **Stripe**: Create account at [Stripe](https://stripe.com) for payment processing
 
 ## 📱 Usage
 

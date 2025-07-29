@@ -18,11 +18,19 @@ const Add = ({token}) => {
   const [price, setPrice] = useState('');
   const [sizes, setSizes] = useState([]);
   const [bestseller, setBestseller] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
 
+    // Prevent multiple submissions
+    if (isSubmitting) {
+      return;
+    }
+
     try {
+      setIsSubmitting(true);
+      
       const formData = new FormData();
 
       image1 && formData.append('image1', image1);
@@ -65,6 +73,9 @@ const Add = ({token}) => {
       console.error('Error adding product:', error);
       toast.error('Error adding product: ' + (error.response?.data?.message || error.message));
       // alert('Error adding product: ' + (error.response?.data?.message || error.message));
+    } finally {
+      // Always reset submitting state regardless of success or failure
+      setIsSubmitting(false);
     }
   }
   
@@ -152,7 +163,17 @@ const Add = ({token}) => {
       </div>
 
       <div>
-        <button className='w-28 py-3 mt-4 bg-black text-white' type='submit'>ADD</button>
+        <button 
+          className={`w-28 py-3 mt-4 text-white font-medium transition-colors ${
+            isSubmitting 
+              ? 'bg-gray-400 cursor-not-allowed' 
+              : 'bg-black hover:bg-gray-800'
+          }`} 
+          type='submit'
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'ADDING...' : 'ADD'}
+        </button>
       </div>
     </form>
   )

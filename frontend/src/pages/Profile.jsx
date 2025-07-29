@@ -14,6 +14,7 @@ const Profile = () => {
   const [orders, setOrders] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [hasActiveOrders, setHasActiveOrders] = useState(false);
   
   const [profileData, setProfileData] = useState({
     firstName: '',
@@ -61,8 +62,15 @@ const Profile = () => {
         headers: { token }
       });
       if (response.data.success) {
+        const allOrders = response.data.orders;
+        
+        // Check for active orders
+        const activeOrderStatuses = ['Order Placed', 'Packing', 'Shipped', 'Out for delivery'];
+        const activeOrders = allOrders.filter(order => activeOrderStatuses.includes(order.status));
+        setHasActiveOrders(activeOrders.length > 0);
+        
         // Filter to show only delivered orders in profile
-        const deliveredOrders = response.data.orders.filter(order => order.status === 'Delivered' || order.status === 'Delivery Failed');
+        const deliveredOrders = allOrders.filter(order => order.status === 'Delivered' || order.status === 'Delivery Failed');
         setOrders(deliveredOrders);
       }
     } catch (error) {
@@ -156,6 +164,10 @@ const Profile = () => {
   };
 
   const openDeleteModal = () => {
+    if (hasActiveOrders) {
+      toast.error('Cannot delete account while you have active orders. Please wait for all orders to be completed or contact support.');
+      return;
+    }
     setShowDeleteModal(true);
   };
 
@@ -479,9 +491,26 @@ const Profile = () => {
             <p className='text-sm text-gray-600 mb-4'>
               Once you delete your account, there is no going back. Please be certain.
             </p>
+            {hasActiveOrders && (
+              <div className='mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md'>
+                <div className='flex items-center'>
+                  <svg className='w-5 h-5 text-yellow-600 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z' />
+                  </svg>
+                  <p className='text-sm text-yellow-800'>
+                    You have active orders. Account deletion is not allowed.
+                  </p>
+                </div>
+              </div>
+            )}
             <button 
               onClick={openDeleteModal}
-              className='bg-red-600 text-white px-8 py-3 text-sm hover:bg-red-700 border border-red-600'
+              disabled={hasActiveOrders}
+              className={`px-8 py-3 text-sm border ${
+                hasActiveOrders 
+                  ? 'bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed' 
+                  : 'bg-red-600 text-white border-red-600 hover:bg-red-700'
+              }`}
             >
               Delete Account
             </button>

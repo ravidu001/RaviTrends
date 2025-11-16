@@ -149,3 +149,6 @@ public/uploads/
 # Local development files
 .env.development
 .env.staging
+
+/Deployment_Steps
+InterviewPreparationGuide.md

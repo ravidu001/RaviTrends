@@ -16,6 +16,7 @@ COPY . .
 # Set build environment variables
 ENV NODE_ENV=production
 ENV CI=false
+ENV VITE_BACKEND_URL=http://16.171.232.156:4000
 
 # Build the application (increase Node memory limit and disable linting)
 RUN NODE_OPTIONS=--max-old-space-size=2048 npm run build || \

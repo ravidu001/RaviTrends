@@ -45,11 +45,10 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
+          no-cache: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/ravitrends-frontend:latest
             ${{ secrets.DOCKER_USERNAME }}/ravitrends-frontend:${{ github.sha }}
-          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/ravitrends-frontend:latest
-          cache-to: type=inline
 
       - name: Build and push Admin image
         uses: docker/build-push-action@v5
@@ -57,11 +56,10 @@ jobs:
           context: ./admin
           file: ./admin/Dockerfile
           push: true
+          no-cache: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/ravitrends-admin:latest
             ${{ secrets.DOCKER_USERNAME }}/ravitrends-admin:${{ github.sha }}
-          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/ravitrends-admin:latest
-          cache-to: type=inline
 
   deploy:
     name: Deploy to AWS EC2
